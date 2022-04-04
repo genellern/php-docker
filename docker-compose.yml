@@ -1,0 +1,54 @@
+version: "3.1"
+services:
+
+  redis:
+    image: redis:alpine
+    platform: linux/x86_64
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  node:
+    build: docker/node
+    container_name: node
+    tty: true
+
+  mysql:
+    image: mysql:5.7
+    platform: linux/x86_64
+    container_name: mysql
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql/
+      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=phpdocker
+      - MYSQL_DATABASE=phpdocker
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=phpdocker
+    ports:
+      - "3306:3306"
+
+  elasticsearch:
+    image: elasticsearch:5.4-alpine
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+
+  php:
+    build: docker/php
+    container_name: php
+    volumes:
+      - ./docker/php/php.ini:/etc/php/8.1/fpm/conf.d/99-overrides.ini
+    ports:
+      - "80:80"
+    environment:
+      - DEBUG=true
+      - MYSQL_ROOT_PASSWORD=phpdocker
+      - MYSQL_DATABASE=phpdocker
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=phpdocker
+      - MYSQL_HOST=mysql
+      - CACHE_DRIVER=Redis
+      - CACHE_HOST=redis
+      - CACHE_PORT=6379
+      - CACHE_DB=phpdocker
