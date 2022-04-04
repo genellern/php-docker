@@ -16,3 +16,5 @@
 
 /logs/*
 !/logs/empty
+docker/mysql/data
+.idea
